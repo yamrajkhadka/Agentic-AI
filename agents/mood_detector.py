@@ -1,5 +1,5 @@
 """
-Mood Detection Agent
+Mood Detection Agent with Llama 3.3 70B
 Analyzes emotional state from user messages
 """
 
@@ -26,21 +26,25 @@ class MoodDetector:
         Initialize mood detector
         
         Args:
-            llm: Optional language model for advanced mood detection
+            llm: Optional language model for advanced mood detection (Llama 3.3 70B)
         """
         self.llm = llm
         
         if llm:
             self.prompt = ChatPromptTemplate.from_messages([
-                ("system", """You are an expert at detecting emotions from text.
-                Analyze the message and respond with ONLY ONE WORD from these options:
-                happy, sad, stressed, romantic, playful, angry, neutral
-                
-                Consider:
-                - Word choice and tone
-                - Emojis and punctuation
-                - Context and subtext
-                """),
+                ("system", """You are Yamraj, an emotionally intelligent boyfriend who deeply understands his girlfriend's feelings.
+
+Analyze her message and detect her emotional state. Respond with ONLY ONE WORD from these options:
+happy, sad, stressed, romantic, playful, angry, neutral
+
+Consider:
+- Word choice and tone
+- Emojis and punctuation  
+- Context and subtext
+- What she really means, not just what she says
+- Her emotional needs behind the words
+
+Be perceptive and caring in your analysis."""),
                 ("user", "{message}")
             ])
             self.chain = self.prompt | llm | StrOutputParser()
@@ -73,7 +77,7 @@ class MoodDetector:
     
     def detect_mood_llm(self, message: str) -> str:
         """
-        LLM-based mood detection (more nuanced, requires LLM)
+        LLM-based mood detection using Llama 3.3 70B (more nuanced, requires LLM)
         
         Args:
             message: User's message
@@ -91,16 +95,16 @@ class MoodDetector:
                 return mood
             return 'neutral'
         except Exception as e:
-            print(f"LLM mood detection failed: {e}")
+            print(f"⚠️  LLM mood detection failed, using simple detection: {e}")
             return self.detect_mood_simple(message)
     
-    def detect(self, message: str, use_llm: bool = False) -> Dict[str, str]:
+    def detect(self, message: str, use_llm: bool = True) -> Dict[str, str]:
         """
-        Main detection method
+        Main detection method - defaults to LLM if available
         
         Args:
             message: User's message
-            use_llm: Whether to use LLM-based detection
+            use_llm: Whether to use LLM-based detection (default: True)
             
         Returns:
             Dict with mood and emoji
@@ -148,6 +152,7 @@ class MoodDetector:
 
 # Example usage
 if __name__ == "__main__":
+    # Test without LLM
     detector = MoodDetector()
     
     test_messages = [
@@ -158,9 +163,9 @@ if __name__ == "__main__":
         "Just a normal day"
     ]
     
-    print("🧠 Mood Detection Demo\n")
+    print("🧠 Mood Detection Demo (Simple Mode)\n")
     for msg in test_messages:
-        result = detector.detect(msg)
+        result = detector.detect(msg, use_llm=False)
         print(f"Message: {msg}")
         print(f"Mood: {result['mood']} {result['emoji']}")
         print(f"Description: {detector.get_mood_description(result['mood'])}")
