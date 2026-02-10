@@ -934,16 +934,25 @@ class HerAIApp:
                 # 1. Try Streamlit secrets (for Streamlit Cloud)
                 try:
                     api_key = st.secrets.get("GROQ_API_KEY")
-                except:
-                    pass
+                    if api_key:
+                        st.sidebar.info(f"🔑 Using Streamlit secrets (key starts with: {api_key[:7]}...)")
+                except Exception as e:
+                    st.sidebar.warning(f"⚠️ Could not read from secrets: {str(e)}")
                 
                 # 2. Try environment variable (for local .env)
                 if not api_key:
                     api_key = os.getenv("GROQ_API_KEY")
+                    if api_key:
+                        st.sidebar.info("🔑 Using environment variable")
                 
                 # 3. Try session state (user entered via UI)
                 if not api_key:
                     api_key = st.session_state.get('user_api_key')
+                    if api_key:
+                        st.sidebar.info("🔑 Using user-provided key")
+                
+                if not api_key:
+                    st.sidebar.error("❌ No API key found in any source!")
                 
                 # Get LLM instance
                 llm = get_llm_instance(api_key)
